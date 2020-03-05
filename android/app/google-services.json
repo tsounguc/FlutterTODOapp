@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "705527419716",
+    "firebase_url": "https://fluttertodo-43664.firebaseio.com",
+    "project_id": "fluttertodo-43664",
+    "storage_bucket": "fluttertodo-43664.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:705527419716:android:1df38d4de695092458bd11",
+        "android_client_info": {
+          "package_name": "edu.gvsu.tsoungucmail.fluttertodoapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "705527419716-nes0s36gruthj3e5vu4v5luvq22u7e6u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkpAQfmObAliJXsG80uBRd87QOS7M-HTE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "705527419716-nes0s36gruthj3e5vu4v5luvq22u7e6u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
