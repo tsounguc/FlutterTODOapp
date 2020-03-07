@@ -61,7 +61,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     shape: RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(30)),
                     color: Colors.white,
-                    onPressed: navigateToLogInPage,
+                    onPressed: navigateToSingUpPage,
                     child: Text('Sign Up'),
                   ),
                 ),

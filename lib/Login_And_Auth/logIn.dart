@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fluttertodoapp/Pages/home.dart';
+import 'package:fluttertodoapp/Pages/todoList.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -51,6 +51,7 @@ class _LoginPageState extends State<LoginPage> {
                       Padding(
                         padding: const EdgeInsets.all(15.0),
                         child: TextFormField(
+                          autofocus: true,
                           validator: (input) {
                             if (input.isEmpty) {
                               return 'Please type a valid email';
@@ -73,6 +74,7 @@ class _LoginPageState extends State<LoginPage> {
                       Padding(
                         padding: const EdgeInsets.all(15.0),
                         child: TextFormField(
+                          autofocus: true,
                           validator: (input) {
                             if (input.length < 6) {
                               return 'Password must have at least 6 characters';
@@ -87,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                               borderRadius: BorderRadius.circular(30.0),
                             ),
                             labelText: 'Password',
-                            prefixIcon: Icon(Icons.email),
+                            prefixIcon: Icon(Icons.lock),
                           ),
                           obscureText: true,
                         ),
@@ -124,7 +126,8 @@ class _LoginPageState extends State<LoginPage> {
         AuthResult user = await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: _email, password: _password);
         //TODO Navigate to todolist page
-        Route route = MaterialPageRoute(builder: (context) => Home(user: user));
+        Route route =
+            MaterialPageRoute(builder: (context) => TodoList(user: user));
         Navigator.push(context, route);
       } catch (e) {
         print(e.message);

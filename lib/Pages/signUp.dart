@@ -50,6 +50,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       Padding(
                         padding: const EdgeInsets.all(15.0),
                         child: TextFormField(
+                          autofocus: true,
                           validator: (input) {
                             if (input.isEmpty) {
                               return 'Please type a valid email';
@@ -71,6 +72,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       Padding(
                         padding: const EdgeInsets.all(15.0),
                         child: TextFormField(
+                          autofocus: true,
                           validator: (input) {
                             if (input.length < 6) {
                               return 'Password must have at least 6 characters';
@@ -85,7 +87,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               borderRadius: BorderRadius.circular(30.0),
                             ),
                             labelText: 'Password',
-                            prefixIcon: Icon(Icons.email),
+                            prefixIcon: Icon(Icons.lock),
                           ),
                           obscureText: true,
                         ),
