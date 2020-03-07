@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertodoapp/Pages/task.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertodoapp/Pages/todoCreate.dart';
 
 class TodoList extends StatefulWidget {
@@ -47,85 +48,154 @@ class _TodoListState extends State<TodoList> {
           onTap: () {
             FocusScope.of(context).requestFocus(new FocusNode());
           },
-          child: Column(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-//                        validator: (input) {
-//                          if (input.isEmpty) {
-//                            return 'Please enter a task';
-//                          }
-//                          return null;
-//                        },
-                        controller: controller,
-//                        onSaved: (input) => _todoNameInput = input,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white70,
-                          suffixIcon: RaisedButton.icon(
-                            color: Colors.white70,
-                            onPressed: () {
-                              WidgetsBinding.instance.addPostFrameCallback(
-                                  (_) => controller.clear());
-                              if (controller.text.isNotEmpty) {
-                                print(controller.text);
-                                onTaskCreated(controller.text);
-                              }
-                            },
-                            icon: Icon(Icons.add),
-                            label: Text(''),
-                          ),
-                        ),
-                      ),
-                    ),
+          child: StreamBuilder(
+              stream: Firestore.instance
+                  .collection('users')
+                  .document('${user.user.email}')
+                  .collection('tasks')
+                  .snapshots(),
+//              stream: getUsersTodoListSnapshots(context),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return loading();
+                }
+                return Column(
+                  children: <Widget>[
+                    textFieldAndButton(),
+                    listOfTodos(snapshot),
                   ],
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: tasks.length,
-                  itemBuilder: (context, index) {
-                    return Theme(
-                      data: ThemeData(
-                        unselectedWidgetColor: Colors.white,
-                      ),
-                      child: CheckboxListTile(
-                        dense: false,
-                        checkColor: Colors.green,
-                        activeColor: Colors.transparent,
-                        title: Text(
-                          tasks[index].name,
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                        value: tasks[index].completed,
-                        onChanged: (bool value) {
-                          setState(() {
-                            tasks[index].completed = value;
-                          });
-
-                          print(tasks[index].completed);
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+                );
+              }),
         ),
       ),
     );
   }
 
   void onTaskCreated(String name) {
-    setState(() {
-      tasks.add(Task(name, false));
+    Firestore.instance.collection('users/${user.user.email}/tasks').add({
+      'name': name,
+      'completed': false,
     });
+  }
+
+  Widget loading() {
+    return Center(
+      child: Column(
+        children: <Widget>[
+          CircularProgressIndicator(),
+          Divider(
+            height: 20,
+          ),
+          Text(
+            'Loading. . .',
+            style: TextStyle(color: Colors.white, fontSize: 24),
+          ),
+        ],
+        mainAxisSize: MainAxisSize.min,
+      ),
+    );
+  }
+
+  textFieldAndButton() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              controller: controller,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white70,
+                suffixIcon: RaisedButton.icon(
+                  color: Colors.white70,
+                  onPressed: () {
+                    WidgetsBinding.instance
+                        .addPostFrameCallback((_) => controller.clear());
+                    if (controller.text.isNotEmpty) {
+                      onTaskCreated(controller.text);
+                    }
+                  },
+                  icon: Icon(Icons.add),
+                  label: Text(''),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  listOfTodos(AsyncSnapshot snapshot) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ListView.separated(
+          separatorBuilder: (context, index) => Divider(
+            color: Colors.black,
+          ),
+          itemCount: snapshot.data.documents.length,
+          itemBuilder: (context, index) {
+            return snapshot.data.documents[0]['name'] == null
+                ? Firestore.instance
+                    .collection('users/${user.user.email}/tasks')
+                    .document(snapshot.data.documents[index].documentID)
+                    .delete()
+                : Dismissible(
+                    key: Key('${snapshot.data.documents[index]}'),
+                    background: Container(color: Colors.red),
+                    onDismissed: (direction) {
+                      Firestore.instance
+                          .collection('users/${user.user.email}/tasks')
+                          .document(snapshot.data.documents[index].documentID)
+                          .delete();
+                    },
+                    child: Theme(
+                      data: ThemeData(
+                        unselectedWidgetColor: Colors.white,
+                      ),
+                      child: ListTile(
+                        dense: false,
+                        title: Text(
+                          snapshot.data.documents[index]['name'],
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        trailing: SizedBox(
+                          width: 50,
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Checkbox(
+                                  checkColor: Colors.green,
+                                  activeColor: Colors.transparent,
+                                  value: snapshot.data.documents[index]
+                                      ['completed'],
+                                  onChanged: (bool value) {
+                                    snapshot.data.documents[index].reference
+                                        .updateData({
+                                      'completed': !snapshot
+                                          .data.documents[index]['completed'],
+                                    });
+                                  },
+                                ),
+                              ),
+                              Container(),
+                              Expanded(
+                                child: IconButton(
+                                    color: Colors.white,
+                                    icon: Icon(Icons.more_vert),
+                                    onPressed: () {}),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+          },
+        ),
+      ),
+    );
   }
 }

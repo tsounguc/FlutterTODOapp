@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertodoapp/Login_And_Auth/logIn.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -122,6 +123,12 @@ class _SignUpPageState extends State<SignUpPage> {
         AuthResult user = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(email: _email, password: _password);
 //        user.sendEmailVerification();
+        Firestore.instance.collection('users').document('$_email').setData({});
+        Firestore.instance
+            .collection('users')
+            .document('$_email')
+            .collection('tasks')
+            .add({});
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => LoginPage()));
       } catch (e) {
