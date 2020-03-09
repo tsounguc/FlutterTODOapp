@@ -18,14 +18,6 @@ class _TodoListState extends State<TodoList> {
   bool onToggle;
   TextEditingController controller = TextEditingController();
 
-  //Creating a list of task with some dummy values for now
-  List<Task> tasks = [
-//    Task('Check email', false),
-//    Task('Laundry', false),
-//    Task('Workout', false),
-//    Task('Go Grocery shopping', false),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -38,10 +30,8 @@ class _TodoListState extends State<TodoList> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          automaticallyImplyLeading: true,
-          title: Text('List'
-//              '${user.user.email}',
-              ),
+          automaticallyImplyLeading: false,
+          title: Text('List'),
           centerTitle: true,
         ),
         body: GestureDetector(
@@ -54,7 +44,6 @@ class _TodoListState extends State<TodoList> {
                   .document('${user.user.email}')
                   .collection('tasks')
                   .snapshots(),
-//              stream: getUsersTodoListSnapshots(context),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return loading();
@@ -71,13 +60,7 @@ class _TodoListState extends State<TodoList> {
     );
   }
 
-  void onTaskCreated(String name) {
-    Firestore.instance.collection('users/${user.user.email}/tasks').add({
-      'name': name,
-      'completed': false,
-    });
-  }
-
+  //Displays circular progress indicator when
   Widget loading() {
     return Center(
       child: Column(
@@ -96,6 +79,9 @@ class _TodoListState extends State<TodoList> {
     );
   }
 
+//--------------------Layout of todolist page-----------------------------------
+
+  // returns the Textfield and add + button
   textFieldAndButton() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -107,13 +93,14 @@ class _TodoListState extends State<TodoList> {
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.white70,
+                hintText: 'Enter task here',
                 suffixIcon: RaisedButton.icon(
                   color: Colors.white70,
                   onPressed: () {
                     WidgetsBinding.instance
                         .addPostFrameCallback((_) => controller.clear());
                     if (controller.text.isNotEmpty) {
-                      onTaskCreated(controller.text);
+                      createTask(controller.text);
                     }
                   },
                   icon: Icon(Icons.add),
@@ -138,18 +125,12 @@ class _TodoListState extends State<TodoList> {
           itemCount: snapshot.data.documents.length,
           itemBuilder: (context, index) {
             return snapshot.data.documents[0]['name'] == null
-                ? Firestore.instance
-                    .collection('users/${user.user.email}/tasks')
-                    .document(snapshot.data.documents[index].documentID)
-                    .delete()
+                ? deleteTask(snapshot, index)
                 : Dismissible(
                     key: Key('${snapshot.data.documents[index]}'),
                     background: Container(color: Colors.red),
                     onDismissed: (direction) {
-                      Firestore.instance
-                          .collection('users/${user.user.email}/tasks')
-                          .document(snapshot.data.documents[index].documentID)
-                          .delete();
+                      deleteTask(snapshot, index);
                     },
                     child: Theme(
                       data: ThemeData(
@@ -162,7 +143,7 @@ class _TodoListState extends State<TodoList> {
                           style: TextStyle(color: Colors.white),
                         ),
                         trailing: SizedBox(
-                          width: 50,
+                          width: 75,
                           child: Row(
                             children: <Widget>[
                               Expanded(
@@ -172,20 +153,58 @@ class _TodoListState extends State<TodoList> {
                                   value: snapshot.data.documents[index]
                                       ['completed'],
                                   onChanged: (bool value) {
-                                    snapshot.data.documents[index].reference
-                                        .updateData({
-                                      'completed': !snapshot
-                                          .data.documents[index]['completed'],
-                                    });
+                                    updateTaskCompletion(
+                                        snapshot,
+                                        snapshot.data.documents[index]
+                                            ['completed'],
+                                        index);
                                   },
                                 ),
                               ),
-                              Container(),
+//                              Container(
+//                                width: 25,
+//                              ),
                               Expanded(
-                                child: IconButton(
-                                    color: Colors.white,
-                                    icon: Icon(Icons.more_vert),
-                                    onPressed: () {}),
+                                child: PopupMenuButton<String>(
+                                  icon: Icon(
+                                    Icons.more_vert,
+                                    size: 30,
+                                    color: Colors.white70,
+                                  ),
+                                  itemBuilder: (BuildContext context) =>
+                                      <PopupMenuEntry<String>>[
+                                    PopupMenuItem<String>(
+                                      value: 'Edit',
+                                      child: Row(
+                                        children: <Widget>[
+                                          Expanded(
+                                            child: Text('Edit'),
+                                          ),
+                                          Icon(Icons.edit),
+                                        ],
+                                      ),
+                                    ),
+                                    PopupMenuItem<String>(
+                                      value: 'Delete',
+                                      child: Row(
+                                        children: <Widget>[
+                                          Expanded(
+                                            child: Text('Delete'),
+                                          ),
+                                          Icon(Icons.delete),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                  onSelected: (menuValue) {
+                                    if (menuValue == 'Edit') {
+                                      _displayDialog(context, snapshot, index);
+                                    }
+                                    if (menuValue == 'Delete') {
+                                      deleteTask(snapshot, index);
+                                    }
+                                  },
+                                ),
                               )
                             ],
                           ),
@@ -197,5 +216,58 @@ class _TodoListState extends State<TodoList> {
         ),
       ),
     );
+  }
+
+  void _displayDialog(
+      BuildContext context, AsyncSnapshot snapshot, int index) async {
+    TextEditingController textEditingController = TextEditingController();
+    return showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.white70,
+//            title: Text('Edit'),
+            content: TextField(
+              controller: textEditingController,
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Submit'),
+                onPressed: () {
+                  updateTaskName(snapshot, textEditingController.text, index);
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  void createTask(String name) async {
+    Firestore.instance.collection('users/${user.user.email}/tasks').add({
+      'name': name,
+      'completed': false,
+    });
+  }
+
+  void updateTaskName(AsyncSnapshot snapshot, String name, int index) async {
+    snapshot.data.documents[index].reference.updateData({
+      'name': name,
+    });
+  }
+
+  void updateTaskCompletion(
+      AsyncSnapshot snapshot, bool completed, int index) async {
+    snapshot.data.documents[index].reference.updateData({
+      'completed': !completed,
+    });
+  }
+
+  deleteTask(AsyncSnapshot snapshot, int index) async {
+    Firestore.instance
+        .collection('users/${user.user.email}/tasks')
+        .document(snapshot.data.documents[index].documentID)
+        .delete();
   }
 }
