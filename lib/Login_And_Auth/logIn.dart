@@ -1,9 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fluttertodoapp/Pages/todoList.dart';
+import 'auth.dart';
 
 class LoginPage extends StatefulWidget {
+  LoginPage(this.auth, this.onSignedIn, this.onSignUpForm);
+
+  final BaseAuth auth;
+  final VoidCallback onSignedIn;
+  final VoidCallback onSignUpForm;
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -11,20 +15,26 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   String _email, _password;
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scafforldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: <Color>[
+//            Colors.deepOrange,
+            Colors.orange,
+            Colors.orangeAccent,
+          ],
+        ),
         image: DecorationImage(
-            image: AssetImage('assets/images/Mountains.jpg'),
-            fit: BoxFit.cover),
+          image: AssetImage('assets/images/Mountains.jpg'),
+          fit: BoxFit.cover,
+        ),
       ),
       child: Scaffold(
+        key: _scafforldKey,
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-//          title: Text('Log in'),
-          backgroundColor: Colors.transparent,
-        ),
         body: GestureDetector(
           onTap: () {
             FocusScope.of(context).requestFocus(new FocusNode());
@@ -36,11 +46,12 @@ class _LoginPageState extends State<LoginPage> {
                 key: _formkey,
                 child: Center(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
                       //TODO: implement fields
                       Padding(
                         padding: const EdgeInsets.only(
-                            left: 8.0, top: 50.0, right: 8.0, bottom: 50),
+                            left: 8.0, top: 150.0, right: 8.0, bottom: 100),
                         child: Center(
                           child: Text(
                             'Log In',
@@ -49,9 +60,10 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(15.0),
+                        padding: const EdgeInsets.only(
+                            left: 0.0, top: 0.0, right: 0.0, bottom: 15.0),
                         child: TextFormField(
-                          autofocus: true,
+                          autofocus: false,
                           validator: (input) {
                             if (input.isEmpty) {
                               return 'Please type a valid email';
@@ -63,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
                             filled: true,
                             fillColor: Colors.white70,
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30.0),
+                              borderRadius: BorderRadius.circular(15.0),
                             ),
                             labelText: 'Email',
                             prefixIcon: Icon(Icons.email),
@@ -72,9 +84,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
 
                       Padding(
-                        padding: const EdgeInsets.all(15.0),
+                        padding: const EdgeInsets.only(
+                            left: 0.0, top: 0.0, right: 0.0, bottom: 15.0),
                         child: TextFormField(
-                          autofocus: true,
+                          autofocus: false,
                           validator: (input) {
                             if (input.length < 6) {
                               return 'Password must have at least 6 characters';
@@ -86,7 +99,7 @@ class _LoginPageState extends State<LoginPage> {
                             filled: true,
                             fillColor: Colors.white70,
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30.0),
+                              borderRadius: BorderRadius.circular(15.0),
                             ),
                             labelText: 'Password',
                             prefixIcon: Icon(Icons.lock),
@@ -99,10 +112,30 @@ class _LoginPageState extends State<LoginPage> {
                         height: 50,
                         child: RaisedButton(
                           shape: RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(30)),
+                              borderRadius: new BorderRadius.circular(15)),
                           color: Colors.white,
-                          onPressed: LogIn,
+                          onPressed: logIn,
                           child: Text('Log in'),
+                        ),
+                      ),
+                      Container(
+                        height: 10,
+                      ),
+                      SizedBox(
+                        width: 200,
+                        height: 50,
+                        child: FlatButton(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: new BorderRadius.circular(15)),
+                          color: Colors.transparent,
+                          onPressed: navigateToSingUpPage,
+                          child: Text(
+                            'Create an account',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                decoration: TextDecoration.underline),
+                          ),
                         ),
                       )
                     ],
@@ -116,22 +149,28 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<void> LogIn() async {
+  //Signs in user after login button is pressed
+  Future<void> logIn() async {
     //TODO Validate fields
     final formState = _formkey.currentState;
     if (formState.validate()) {
       //TODO Login to firebase
       formState.save();
       try {
-        AuthResult user = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(email: _email, password: _password);
-        //TODO Navigate to todolist page
-        Route route =
-            MaterialPageRoute(builder: (context) => TodoList(user: user));
-        Navigator.push(context, route);
+        await widget.auth.signInWithEmailAndPassword(_email, _password);
+        widget.onSignedIn();
       } catch (e) {
         print(e.message);
+        _scafforldKey.currentState.showSnackBar(SnackBar(
+          content: Text('${e.message}'),
+          duration: Duration(seconds: 5),
+        ));
       }
     }
+  }
+
+  //Uses callback function to navigate to sign up page
+  void navigateToSingUpPage() {
+    widget.onSignUpForm();
   }
 }

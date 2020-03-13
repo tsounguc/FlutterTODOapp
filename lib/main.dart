@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertodoapp/Login_And_Auth/auth.dart';
 import 'package:fluttertodoapp/Pages/welcome.dart';
+import 'package:fluttertodoapp/routingPage.dart';
 
 void main() => runApp(MyApp());
 
@@ -8,11 +10,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter Todo',
 //      theme: ThemeData(
 //        primarySwatch: Colors.blue,
 //      ),
-      home: WelcomePage(), // removed original title
+//      home: RoutingPage(new Auth()), // removed original title
+      home: WelcomePage(),
       debugShowCheckedModeBanner: false,
     );
   }

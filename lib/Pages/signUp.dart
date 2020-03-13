@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fluttertodoapp/Login_And_Auth/logIn.dart';
+import 'package:fluttertodoapp/Login_And_Auth/auth.dart';
 
 class SignUpPage extends StatefulWidget {
+  SignUpPage(this.auth, this.onSignedOut, this.onLogInForm);
+  final BaseAuth auth;
+  final VoidCallback onSignedOut;
+  final VoidCallback onLogInForm;
   @override
   _SignUpPageState createState() => _SignUpPageState();
 }
@@ -11,20 +14,26 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   String _email, _password;
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: <Color>[
+//            Colors.deepOrange,
+            Colors.orange,
+            Colors.orangeAccent,
+          ],
+        ),
         image: DecorationImage(
-            image: AssetImage('assets/images/Mountains.jpg'),
-            fit: BoxFit.cover),
+          image: AssetImage('assets/images/Mountains.jpg'),
+          fit: BoxFit.cover,
+        ),
       ),
       child: Scaffold(
+        key: _scaffoldKey,
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-//        title: Text('Sign Up'),
-          backgroundColor: Colors.transparent,
-        ),
         body: GestureDetector(
           onTap: () {
             FocusScope.of(context).requestFocus(new FocusNode());
@@ -36,11 +45,12 @@ class _SignUpPageState extends State<SignUpPage> {
                 key: _formkey,
                 child: Center(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
                       //TODO: implement fields
                       Padding(
                         padding: const EdgeInsets.only(
-                            left: 8.0, top: 50.0, right: 8.0, bottom: 50),
+                            left: 8.0, top: 150.0, right: 8.0, bottom: 100),
                         child: Center(
                           child: Text(
                             'Sign Up',
@@ -49,9 +59,10 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(15.0),
+                        padding: const EdgeInsets.only(
+                            left: 0.0, top: 0.0, right: 0.0, bottom: 15.0),
                         child: TextFormField(
-                          autofocus: true,
+                          autofocus: false,
                           validator: (input) {
                             if (input.isEmpty) {
                               return 'Please type a valid email';
@@ -63,7 +74,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             filled: true,
                             fillColor: Colors.white70,
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30.0),
+                              borderRadius: BorderRadius.circular(15.0),
                             ),
                             labelText: 'Email',
                             prefixIcon: Icon(Icons.email),
@@ -71,9 +82,10 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(15.0),
+                        padding: const EdgeInsets.only(
+                            left: 0.0, top: 0.0, right: 0.0, bottom: 15.0),
                         child: TextFormField(
-                          autofocus: true,
+                          autofocus: false,
                           validator: (input) {
                             if (input.length < 6) {
                               return 'Password must have at least 6 characters';
@@ -85,7 +97,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             filled: true,
                             fillColor: Colors.white70,
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30.0),
+                              borderRadius: BorderRadius.circular(15.0),
                             ),
                             labelText: 'Password',
                             prefixIcon: Icon(Icons.lock),
@@ -93,15 +105,36 @@ class _SignUpPageState extends State<SignUpPage> {
                           obscureText: true,
                         ),
                       ),
+
                       SizedBox(
                         width: 200,
                         height: 50,
                         child: RaisedButton(
                           shape: RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(30)),
+                              borderRadius: new BorderRadius.circular(15)),
                           color: Colors.white,
                           onPressed: signUp,
-                          child: Text('Sign Up'),
+                          child: Text('Create Account'),
+                        ),
+                      ),
+                      Container(
+                        height: 10,
+                      ),
+                      SizedBox(
+                        width: 200,
+                        height: 50,
+                        child: FlatButton(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: new BorderRadius.circular(15)),
+                          color: Colors.transparent,
+                          onPressed: navigateToLogInPage,
+                          child: Text(
+                            'Have an account?  Login',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                decoration: TextDecoration.underline),
+                          ),
                         ),
                       )
                     ],
@@ -117,23 +150,31 @@ class _SignUpPageState extends State<SignUpPage> {
 
   void signUp() async {
     final formState = _formkey.currentState;
-    if (_formkey.currentState.validate()) {
-      _formkey.currentState.save();
+    if (formState.validate()) {
+      formState.save();
       try {
-        AuthResult user = await FirebaseAuth.instance
-            .createUserWithEmailAndPassword(email: _email, password: _password);
+        String userEmail =
+            await widget.auth.createUserWithEmailAndPassword(_email, _password);
 //        user.sendEmailVerification();
-        Firestore.instance.collection('users').document('$_email').setData({});
         Firestore.instance
             .collection('users')
-            .document('$_email')
+            .document('$userEmail')
+            .setData({});
+        Firestore.instance
+            .collection('users')
+            .document('$userEmail')
             .collection('tasks')
             .add({});
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => LoginPage()));
+        navigateToLogInPage();
       } catch (e) {
-        print(e.message);
+        _scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text('${e.message}'),
+        ));
       }
     }
+  }
+
+  void navigateToLogInPage() {
+    widget.onLogInForm();
   }
 }
