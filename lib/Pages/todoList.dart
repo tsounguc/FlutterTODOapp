@@ -3,6 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertodoapp/Login_And_Auth/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+///*****************************************************************************
+///* Description: This class displays the list of tasks after the user has
+///* logged in.
+///* Author: Christian Tsoungui Nkoulou
+///* Date: March 13, 2020
+///*****************************************************************************
 class TodoList extends StatefulWidget {
   TodoList(
     this.auth,
@@ -25,7 +31,6 @@ class _TodoListState extends State<TodoList> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: <Color>[
-//            Colors.deepOrange,
             Colors.orange,
             Colors.orangeAccent,
           ],

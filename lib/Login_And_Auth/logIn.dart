@@ -2,6 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'auth.dart';
 
+///*****************************************************************************
+///* Description: This class displays the UI for the logging in and appears
+///* after the welcome splash screen.
+///* Author: Christian Tsoungui Nkoulou
+///* Date: March 13, 2020
+///*****************************************************************************
 class LoginPage extends StatefulWidget {
   LoginPage(this.auth, this.onSignedIn, this.onSignUpForm);
 
@@ -22,7 +28,6 @@ class _LoginPageState extends State<LoginPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: <Color>[
-//            Colors.deepOrange,
             Colors.orange,
             Colors.orangeAccent,
           ],

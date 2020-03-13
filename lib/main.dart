@@ -1,20 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertodoapp/Login_And_Auth/auth.dart';
 import 'package:fluttertodoapp/Pages/welcome.dart';
-import 'package:fluttertodoapp/routingPage.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(ListeDeTachesApp());
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+class ListeDeTachesApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Todo',
-//      theme: ThemeData(
-//        primarySwatch: Colors.blue,
-//      ),
-//      home: RoutingPage(new Auth()), // removed original title
+      title: 'Liste de Tâches',
       home: WelcomePage(),
       debugShowCheckedModeBanner: false,
     );

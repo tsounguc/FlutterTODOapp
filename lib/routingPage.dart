@@ -4,7 +4,13 @@ import 'package:fluttertodoapp/Login_And_Auth/logIn.dart';
 import 'package:fluttertodoapp/Pages/signUp.dart';
 import 'package:fluttertodoapp/Pages/todoList.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+///*****************************************************************************
+///* Description: This class routes the app to different pages based on input from user.
+///* It helps to keep the user logged in if he/she gets out of app without
+///* logging out
+///* Author: Christian Tsoungui Nkoulou
+///* Date: March 13, 2020
+///*****************************************************************************
 class RoutingPage extends StatefulWidget {
   RoutingPage(this.auth);
   final BaseAuth auth;
@@ -34,39 +40,6 @@ class _RoutingPageState extends State<RoutingPage> {
     _getCurrentUser();
   }
 
-  _getCurrentUser() async {
-    currentUser = await widget.auth.currentUser();
-    setState(() {
-      _authStatus =
-          currentUser != null ? AuthStatus.signedIn : AuthStatus.notSignedIn;
-    });
-  }
-
-  void logInForm() {
-    setState(() {
-      _formtype = FormType.login;
-    });
-  }
-
-  void signUpForm() {
-    setState(() {
-      _formtype = FormType.register;
-    });
-  }
-
-  void _signedIn() {
-    setState(() {
-      _authStatus = AuthStatus.signedIn;
-    });
-    _getCurrentUser();
-  }
-
-  void _signOut() {
-    setState(() {
-      _authStatus = AuthStatus.notSignedIn;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     switch (_authStatus) {
@@ -80,5 +53,43 @@ class _RoutingPageState extends State<RoutingPage> {
       case AuthStatus.signedIn:
         return TodoList(widget.auth, _signOut, currentUser);
     }
+  }
+
+  //Gets current user info
+  _getCurrentUser() async {
+    currentUser = await widget.auth.currentUser();
+    setState(() {
+      _authStatus =
+          currentUser != null ? AuthStatus.signedIn : AuthStatus.notSignedIn;
+    });
+  }
+
+  //Sets formtype enum to login
+  void logInForm() {
+    setState(() {
+      _formtype = FormType.login;
+    });
+  }
+
+  //Sets formtype enum to register
+  void signUpForm() {
+    setState(() {
+      _formtype = FormType.register;
+    });
+  }
+
+  //Sets authentication status to signedIn and calls _getCurrentUser()
+  void _signedIn() {
+    setState(() {
+      _authStatus = AuthStatus.signedIn;
+    });
+    _getCurrentUser();
+  }
+
+  //Sets authentication status to notSigned in
+  void _signOut() {
+    setState(() {
+      _authStatus = AuthStatus.notSignedIn;
+    });
   }
 }

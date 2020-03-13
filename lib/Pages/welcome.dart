@@ -1,10 +1,14 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:fluttertodoapp/Login_And_Auth/auth.dart';
-import 'package:fluttertodoapp/Login_And_Auth/logIn.dart';
-import 'package:fluttertodoapp/Pages/signUp.dart';
 import 'package:fluttertodoapp/routingPage.dart';
+
+///*****************************************************************************
+///* Description: This class displays the welcome page/splashed screen.
+///* I named this app Liste de Tâches, which is french for todo-list
+///* Author: Christian Tsoungui Nkoulou
+///* Date: March 13, 2020
+///*****************************************************************************
 
 class WelcomePage extends StatefulWidget {
   @override
@@ -33,7 +37,6 @@ class _WelcomePageState extends State<WelcomePage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: <Color>[
-//            Colors.deepOrange,
             Colors.orange,
             Colors.orangeAccent,
           ],
@@ -63,7 +66,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     ),
                     Center(
                       child: Text(
-                        'Liste de tâches',
+                        'Liste de Tâches',
                         style: TextStyle(color: Colors.white, fontSize: 40),
                       ),
                     ),
@@ -85,50 +88,10 @@ class _WelcomePageState extends State<WelcomePage> {
                   ],
                 ),
               ),
-//              Padding(
-//                padding: const EdgeInsets.all(8.0),
-//                child: SizedBox(
-//                  width: 200,
-//                  height: 50,
-//                  child: RaisedButton(
-//                    shape: RoundedRectangleBorder(
-//                        borderRadius: new BorderRadius.circular(30)),
-//                    color: Colors.white,
-//                    onPressed: navigateToLogInPage,
-//                    child: Text('Log In'),
-//                  ),
-//                ),
-//              ),
-//              Padding(
-//                padding: const EdgeInsets.all(8.0),
-//                child: SizedBox(
-//                  width: 200,
-//                  height: 50,
-//                  child: RaisedButton(
-//                    shape: RoundedRectangleBorder(
-//                        borderRadius: new BorderRadius.circular(30)),
-//                    color: Colors.white,
-//                    onPressed: navigateToSingUpPage,
-//                    child: Text('Sign Up'),
-//                  ),
-//                ),
-//              ),
             ],
           ),
         ),
       ),
     );
-  }
-
-  void navigateToLogInPage() {
-//    Route route = MaterialPageRoute(
-//        builder: (context) => LoginPage(new Auth()), fullscreenDialog: false);
-//    Navigator.pushReplacement(context, route);
-  }
-
-  void navigateToSingUpPage() {
-//    Route route = MaterialPageRoute(
-//        builder: (context) => SignUpPage(new Auth()), fullscreenDialog: false);
-//    Navigator.pushReplacement(context, route);
   }
 }

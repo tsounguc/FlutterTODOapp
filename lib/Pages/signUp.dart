@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertodoapp/Login_And_Auth/auth.dart';
-
+///*****************************************************************************
+///* Description: This class displays the UI for the creating an account
+///* Author: Christian Tsoungui Nkoulou
+///* Date: March 13, 2020
+///*****************************************************************************
 class SignUpPage extends StatefulWidget {
   SignUpPage(this.auth, this.onSignedOut, this.onLogInForm);
   final BaseAuth auth;
@@ -21,7 +25,6 @@ class _SignUpPageState extends State<SignUpPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: <Color>[
-//            Colors.deepOrange,
             Colors.orange,
             Colors.orangeAccent,
           ],
